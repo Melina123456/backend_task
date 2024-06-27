@@ -23,7 +23,7 @@ model Product {
   discountPercentage   Float
   rating               Float
   stock                Int
-  tags                 Tag[]      // Corrected: one-to-many relation
+  tags                 Tag[]    
   brand                String?
   sku                  String
   weight               Float
@@ -32,12 +32,12 @@ model Product {
   warrantyInformation  String
   shippingInformation  String
   availabilityStatus   String
-  reviews              Review[]   // Corrected: one-to-many relation
+  reviews              Review[]  
   returnPolicy         String
   minimumOrderQuantity Int
   meta                 Meta?      @relation(fields: [metaId], references: [id])
   metaId               Int?       @unique
-  images               Image[]    // Corrected: one-to-many relation
+  images               Image[]    
   thumbnail            String
 }
 

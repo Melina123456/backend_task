@@ -17,7 +17,7 @@ const start = async () => {
       {
         resource: { model: getModelByName("Product"), client: prisma },
         options: {
-          listProperties: ["images", "title", "category", "price", "rating"],
+          listProperties: ["thumbnail", "title", "category", "price", "rating"],
         },
       },
       {
