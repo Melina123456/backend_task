@@ -11,13 +11,11 @@ CREATE TABLE "Product" (
     "brand" TEXT,
     "sku" TEXT NOT NULL,
     "weight" DOUBLE PRECISION NOT NULL,
-    "dimensionsId" INTEGER,
     "warrantyInformation" TEXT NOT NULL,
     "shippingInformation" TEXT NOT NULL,
     "availabilityStatus" TEXT NOT NULL,
     "returnPolicy" TEXT NOT NULL,
     "minimumOrderQuantity" INTEGER NOT NULL,
-    "metaId" INTEGER,
     "thumbnail" TEXT NOT NULL,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
@@ -38,17 +36,9 @@ CREATE TABLE "Dimension" (
     "width" DOUBLE PRECISION NOT NULL,
     "height" DOUBLE PRECISION NOT NULL,
     "depth" DOUBLE PRECISION NOT NULL,
-
-    CONSTRAINT "Dimension_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Image" (
-    "id" SERIAL NOT NULL,
-    "url" TEXT NOT NULL,
     "productId" INTEGER NOT NULL,
 
-    CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Dimension_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -65,6 +55,27 @@ CREATE TABLE "Review" (
 );
 
 -- CreateTable
+CREATE TABLE "Meta" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "barcode" TEXT NOT NULL,
+    "qrCode" TEXT NOT NULL,
+    "productId" INTEGER NOT NULL,
+
+    CONSTRAINT "Meta_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Image" (
+    "id" SERIAL NOT NULL,
+    "url" TEXT NOT NULL,
+    "productId" INTEGER NOT NULL,
+
+    CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -72,22 +83,11 @@ CREATE TABLE "Category" (
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Meta" (
-    "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "barcode" TEXT NOT NULL,
-    "qrCode" TEXT NOT NULL,
-
-    CONSTRAINT "Meta_pkey" PRIMARY KEY ("id")
-);
+-- CreateIndex
+CREATE UNIQUE INDEX "Dimension_productId_key" ON "Dimension"("productId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Product_dimensionsId_key" ON "Product"("dimensionsId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Product_metaId_key" ON "Product"("metaId");
+CREATE UNIQUE INDEX "Meta_productId_key" ON "Meta"("productId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
@@ -96,16 +96,16 @@ CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_dimensionsId_fkey" FOREIGN KEY ("dimensionsId") REFERENCES "Dimension"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_metaId_fkey" FOREIGN KEY ("metaId") REFERENCES "Meta"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Tag" ADD CONSTRAINT "Tag_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Image" ADD CONSTRAINT "Image_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Dimension" ADD CONSTRAINT "Dimension_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Meta" ADD CONSTRAINT "Meta_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Image" ADD CONSTRAINT "Image_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

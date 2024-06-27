@@ -1,42 +1,29 @@
 import axios from "axios";
 import { PrismaClient } from "@prisma/client";
 
+import "dotenv/config";
 const prisma = new PrismaClient();
 
-async function fetchAndStoreData() {
+async function fetchAndStoreProducts() {
   try {
+    // Fetch product data from the API
     const response = await axios.get("https://dummyjson.com/products");
     const products = response.data.products;
 
+    // Normalize and store data
     for (const product of products) {
-      const dimension = product.dimensions
-        ? await prisma.dimension.create({
-            data: {
-              width: product.dimensions.width,
-              height: product.dimensions.height,
-              depth: product.dimensions.depth,
-            },
-          })
-        : null;
-
-      const meta = product.meta
-        ? await prisma.meta.create({
-            data: {
-              createdAt: new Date(product.meta.createdAt),
-              updatedAt: new Date(product.meta.updatedAt),
-              barcode: product.meta.barcode,
-              qrCode: product.meta.qrCode,
-            },
-          })
-        : null;
-
-      const category = await prisma.category.upsert({
+      let category = await prisma.category.findUnique({
         where: { name: product.category },
-        update: {},
-        create: { name: product.category },
       });
 
-      const newProduct = await prisma.product.create({
+      // If category doesn't exist, create it
+      if (!category) {
+        category = await prisma.category.create({
+          data: { name: product.category },
+        });
+      }
+      // Create product with relations
+      await prisma.product.create({
         data: {
           title: product.title,
           description: product.description,
@@ -45,58 +32,67 @@ async function fetchAndStoreData() {
           discountPercentage: product.discountPercentage,
           rating: product.rating,
           stock: product.stock,
-          brand: product.brand,
+          brand: product.brand || null,
           sku: product.sku,
           weight: product.weight,
-          dimensionsId: dimension ? dimension.id : null,
+          dimensions: product.dimensions
+            ? {
+                create: {
+                  width: product.dimensions.width,
+                  height: product.dimensions.height,
+                  depth: product.dimensions.depth,
+                },
+              }
+            : undefined,
           warrantyInformation: product.warrantyInformation,
           shippingInformation: product.shippingInformation,
           availabilityStatus: product.availabilityStatus,
           returnPolicy: product.returnPolicy,
           minimumOrderQuantity: product.minimumOrderQuantity,
-          metaId: meta ? meta.id : null,
+          meta: product.meta
+            ? {
+                create: {
+                  createdAt: new Date(product.meta.createdAt),
+                  updatedAt: new Date(product.meta.updatedAt),
+                  barcode: product.meta.barcode,
+                  qrCode: product.meta.qrCode,
+                },
+              }
+            : undefined,
+          images: {
+            create: product.images.map((image: any) => ({ url: image })),
+          },
+          tags: {
+            create: product.tags.map((tag: any) => ({ name: tag })),
+          },
+          reviews: {
+            create: product.reviews.map(
+              (review: {
+                rating: any;
+                comment: any;
+                date: string | number | Date;
+                reviewerName: any;
+                reviewerEmail: any;
+              }) => ({
+                rating: review.rating,
+                comment: review.comment,
+                date: new Date(review.date),
+                reviewerName: review.reviewerName,
+                reviewerEmail: review.reviewerEmail,
+              })
+            ),
+          },
           thumbnail: product.thumbnail,
         },
       });
-
-      for (const tagName of product.tags) {
-        await prisma.tag.create({
-          data: {
-            name: tagName,
-            productId: newProduct.id,
-          },
-        });
-      }
-
-      for (const image of product.images) {
-        await prisma.image.create({
-          data: {
-            url: image,
-            productId: newProduct.id,
-          },
-        });
-      }
-
-      for (const review of product.reviews) {
-        await prisma.review.create({
-          data: {
-            rating: review.rating,
-            comment: review.comment,
-            date: new Date(review.date),
-            reviewerName: review.reviewerName,
-            reviewerEmail: review.reviewerEmail,
-            productId: newProduct.id,
-          },
-        });
-      }
     }
 
-    console.log("Data fetched and stored successfully");
+    console.log("Data successfully stored in the database.");
   } catch (error) {
-    console.error("Error fetching and storing data:", error);
+    console.error("Error fetching or storing data:", error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-fetchAndStoreData();
+fetchAndStoreProducts();
