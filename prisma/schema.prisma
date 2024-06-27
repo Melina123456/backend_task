@@ -14,66 +14,77 @@ datasource db {
 }
 
 model Product {
-  id                  Int            @id @default(autoincrement())
-  title               String
-  description         String
-  categoryId          Int
-  category            Category       @relation(fields: [categoryId], references: [id])
-  price               Float
-  discountPercentage  Float
-  rating              Float
-  stock               Int
-  brand               String?
-  sku                 String
-  weight              Float
-  dimensionsId        Int
-  dimensions          Dimensions     @relation(fields: [dimensionsId], references: [id])
-  warrantyInformation String
-  shippingInformation String
-  availabilityStatus  String
-  returnPolicy        String
+  id                   Int        @id @default(autoincrement())
+  title                String
+  description          String
+  categoryId           Int
+  category             Category   @relation(fields: [categoryId], references: [id])
+  price                Float
+  discountPercentage   Float
+  rating               Float
+  stock                Int
+  tags                 Tag[]      // Corrected: one-to-many relation
+  brand                String?
+  sku                  String
+  weight               Float
+  dimensions           Dimension? @relation(fields: [dimensionsId], references: [id])
+  dimensionsId         Int?       @unique
+  warrantyInformation  String
+  shippingInformation  String
+  availabilityStatus   String
+  reviews              Review[]   // Corrected: one-to-many relation
+  returnPolicy         String
   minimumOrderQuantity Int
-  metaId              Int
-  meta                Meta           @relation(fields: [metaId], references: [id])
-  reviews             Review[]
-  images              Image[]
+  meta                 Meta?      @relation(fields: [metaId], references: [id])
+  metaId               Int?       @unique
+  images               Image[]    // Corrected: one-to-many relation
+  thumbnail            String
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+model Dimension {
+  id       Int       @id @default(autoincrement())
+  width    Float
+  height   Float
+  depth    Float
+  product  Product?
+}
+
+model Image {
+  id        Int       @id @default(autoincrement())
+  url       String
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+model Review {
+  id            Int       @id @default(autoincrement())
+  rating        Int
+  comment       String
+  date          DateTime
+  reviewerName  String
+  reviewerEmail String
+  productId     Int
+  product       Product   @relation(fields: [productId], references: [id])
 }
 
 model Category {
-  id    Int       @id @default(autoincrement())
-  name  String
-  products Product[]
-}
-
-model Dimensions {
-  id     Int     @id @default(autoincrement())
-  width  Float
-  height Float
-  depth  Float
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  products  Product[] 
 }
 
 model Meta {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   createdAt DateTime
   updatedAt DateTime
   barcode   String
   qrCode    String
-}
-
-model Review {
-  id          Int      @id @default(autoincrement())
-  rating      Int
-  comment     String
-  date        DateTime
-  reviewerName String
-  reviewerEmail String
-  productId   Int
-  product     Product  @relation(fields: [productId], references: [id])
-}
-
-model Image {
-  id        Int      @id @default(autoincrement())
-  url       String
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product?
 }
