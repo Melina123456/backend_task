@@ -64,5 +64,5 @@ The application also provides an AdminJS interface for managing products, catego
 
 API Documentation
 https://documenter.getpostman.com/view/32152233/2sA3dsoEaT
-or simply you get documentation from 
+or simply you get dummy products from 
 https://dummyjson.com/products
