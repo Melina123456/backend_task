@@ -63,6 +63,10 @@ The application also provides an AdminJS interface for managing products, catego
     npm start 
 
 API Documentation
-https://documenter.getpostman.com/view/32152233/2sA3dsoEaT
-or simply you get dummy products from 
+https://documenter.getpostman.com/view/32152233/2sA3duECke
+get dummy products from 
 https://dummyjson.com/products
+
+References for documentation 
+https://docs.adminjs.co/basics/api?fbclid=IwZXh0bgNhZW0CMTAAAR09OwG_PT5wFw-AlKZqLfCtEICPkL6Qzj-WU-K23EhRgzpCdJFR8flTL2A_aem_6rWgMkej0mmuRlR0h_zTFQ
+
